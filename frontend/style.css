@@ -1,0 +1,505 @@
+/* @author Salama Malek */
+
+.nm-tool--conncheck {
+    --nm-radius: 22px;
+    --nm-radius-sm: 14px;
+    --nm-pad: 28px;
+    --nm-gap: 16px;
+    --nm-border: 1px solid var(--gray-200, #e6e6e6);
+    --nm-text: var(--gray-900, #1b1b1b);
+    --nm-muted: var(--gray-500, #6d6d6d);
+    --nm-surface: var(--white, #ffffff);
+    --nm-surface-soft: var(--gray-50, #fafafa);
+    --nm-brand: var(--brand-500, #4a88ee);
+    --nm-brand-soft: var(--brand-50, #f0f6fe);
+    --nm-good: var(--green-600, #00a778);
+    --nm-good-soft: var(--green-100, #defbf2);
+    --nm-bad: var(--rose-600, #e13961);
+    --nm-bad-soft: var(--rose-100, #ffe4ea);
+    --nm-warn: var(--amber-500, #f5a524);
+    --nm-warn-soft: var(--amber-100, #fef3d8);
+
+    color: var(--nm-text);
+}
+
+.nm-tool--conncheck .nm-tool__wrapper {
+    width: min(1440px, 100%);
+    margin-inline: auto;
+    padding-inline: clamp(18px, 4vw, 48px);
+    box-sizing: border-box;
+}
+
+/* Shell grid: the live exit IP card left, the pending check cards stacked
+   beside it. Placeholder cards collapse below it on tablet and phone. */
+.nm-conncheck__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--nm-gap);
+    align-items: start;
+}
+
+.nm-conncheck__exit-ip {
+    grid-row: span 3;
+}
+
+.nm-conncheck__webrtc,
+.nm-conncheck__turn,
+.nm-conncheck__http3 {
+    grid-column: 2 / -1;
+}
+
+@media (max-width: 980px) {
+    .nm-conncheck__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nm-conncheck__exit-ip {
+        grid-row: auto;
+    }
+
+    .nm-conncheck__webrtc,
+    .nm-conncheck__turn,
+    .nm-conncheck__http3 {
+        grid-column: auto;
+    }
+
+    .nm-tool--conncheck .nm-conncheck__report-json { max-height: 360px; }
+}
+
+.nm-tool--conncheck .nm-card {
+    min-width: 0;
+    padding: var(--nm-pad);
+    background: var(--nm-surface-soft);
+    border-radius: var(--nm-radius);
+}
+
+.nm-tool--conncheck .nm-card__title {
+    margin: 0 0 10px;
+    font-family: var(--font-display, "Archivo", sans-serif);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--nm-text);
+}
+
+.nm-tool--conncheck .nm-card__intro {
+    margin: 0 0 18px;
+    color: var(--nm-muted);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.55;
+}
+
+/* Pending checks: same card, visibly not-yet-live, no fake results. */
+.nm-tool--conncheck .nm-card--placeholder {
+    border: var(--nm-border);
+    background: var(--nm-surface);
+}
+
+.nm-tool--conncheck .nm-card--placeholder .nm-card__title {
+    color: var(--nm-muted);
+}
+
+.nm-tool--conncheck .nm-card--placeholder .nm-card__intro {
+    margin-bottom: 0;
+}
+
+.nm-tool--conncheck .nm-pill {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 4px 12px;
+    background: var(--nm-brand-soft);
+    border-radius: 999px;
+    color: var(--nm-brand);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+/* dl pattern shared with the other tool widgets */
+.nm-tool--conncheck .nm-fields {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) minmax(0, 1fr);
+    gap: 0;
+    margin: 0 0 20px;
+    border-top: var(--nm-border);
+}
+
+.nm-tool--conncheck .nm-fields dt,
+.nm-tool--conncheck .nm-fields dd {
+    margin: 0;
+    padding: 14px 0;
+    border-bottom: var(--nm-border);
+    overflow-wrap: anywhere;
+}
+
+.nm-tool--conncheck .nm-fields dt {
+    color: var(--nm-muted);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.nm-tool--conncheck .nm-fields dd {
+    color: var(--nm-text);
+    font-size: 15px;
+    font-weight: 700;
+    text-align: right;
+}
+
+/* Check-status colouring */
+.nm-tool--conncheck .nm-fields dd[data-state="complete"] .nm-fields__value {
+    color: var(--nm-good);
+}
+
+.nm-tool--conncheck .nm-fields dd[data-state="running"] .nm-fields__value {
+    color: var(--nm-brand);
+}
+
+.nm-tool--conncheck .nm-fields dd[data-state="error"] .nm-fields__value {
+    color: var(--nm-bad);
+}
+
+/* Tighter dl for secondary data rows inside the check cards */
+.nm-tool--conncheck .nm-fields--tight {
+    margin-bottom: 0;
+}
+
+.nm-tool--conncheck .nm-fields--tight dt,
+.nm-tool--conncheck .nm-fields--tight dd {
+    padding: 10px 0;
+    font-size: 13px;
+}
+
+.nm-tool--conncheck .nm-fields--tight dd {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* Verdict vocabulary — ported from the WebRTC widget. The card background
+   follows the tone: a leak must never sit on the success colour. */
+.nm-tool--conncheck .nm-verdict__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.nm-tool--conncheck .nm-verdict__head strong {
+    color: var(--nm-text);
+    font-family: var(--font-display, "Archivo", sans-serif);
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.nm-tool--conncheck .nm-verdict__dot {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--nm-muted);
+}
+
+.nm-tool--conncheck .nm-verdict__copy {
+    margin: 0 0 16px;
+    color: var(--nm-muted);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.nm-tool--conncheck [data-verdict-box][data-tone="bad"],
+.nm-tool--conncheck [data-turn-box][data-tone="bad"],
+.nm-tool--conncheck [data-h3-box][data-tone="bad"] {
+    background: var(--nm-bad-soft);
+}
+
+.nm-tool--conncheck [data-verdict-box][data-tone="good"],
+.nm-tool--conncheck [data-turn-box][data-tone="good"],
+.nm-tool--conncheck [data-h3-box][data-tone="good"] {
+    background: var(--nm-good-soft);
+}
+
+.nm-tool--conncheck [data-verdict-box][data-tone="warning"],
+.nm-tool--conncheck [data-turn-box][data-tone="warning"],
+.nm-tool--conncheck [data-h3-box][data-tone="warning"] {
+    background: var(--nm-warn-soft);
+}
+
+.nm-tool--conncheck [data-tone="good"]    .nm-verdict__dot { background: var(--nm-good); }
+.nm-tool--conncheck [data-tone="bad"]     .nm-verdict__dot { background: var(--nm-bad); }
+.nm-tool--conncheck [data-tone="warning"] .nm-verdict__dot { background: var(--nm-warn); }
+.nm-tool--conncheck [data-tone="running"] .nm-verdict__dot { background: var(--nm-brand); }
+
+/* Exposed-addresses summary — full-width headline above the check grid. */
+.nm-tool--conncheck .nm-conncheck__exposed {
+    margin-bottom: var(--nm-gap);
+}
+
+.nm-tool--conncheck [data-exposed-box][data-tone="bad"]     { background: var(--nm-bad-soft); }
+.nm-tool--conncheck [data-exposed-box][data-tone="good"]    { background: var(--nm-good-soft); }
+.nm-tool--conncheck [data-exposed-box][data-tone="warning"] { background: var(--nm-warn-soft); }
+
+.nm-tool--conncheck .nm-exposed__list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.nm-tool--conncheck .nm-exposed__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--nm-surface);
+    border: var(--nm-border);
+    border-radius: 12px;
+}
+
+/* A leaked address (differs from the HTTP exit) is called out in red. */
+.nm-tool--conncheck .nm-exposed__row.is-leaked {
+    border-color: var(--nm-bad);
+    background: var(--nm-bad-soft);
+}
+
+.nm-tool--conncheck .nm-exposed__label {
+    color: var(--nm-muted);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.nm-tool--conncheck .nm-exposed__row.is-leaked .nm-exposed__label {
+    color: var(--nm-bad);
+}
+
+.nm-tool--conncheck .nm-exposed__ip {
+    color: var(--nm-text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: right;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+}
+
+/* Side-by-side HTTP IP / WebRTC IP block the verdict is computed from */
+.nm-tool--conncheck .nm-verdict__compare {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.nm-tool--conncheck .nm-verdict__compare-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.nm-tool--conncheck .nm-verdict__compare dt {
+    color: var(--nm-muted);
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.nm-tool--conncheck .nm-verdict__compare dd {
+    margin: 0;
+    color: var(--nm-text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: right;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+}
+
+/* Buttons — same vocabulary as the other tool widgets */
+.nm-tool--conncheck .nm-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: 12px 20px;
+    border: 0;
+    border-radius: 14px;
+    font: 700 15px/1.35 var(--font-body, "Involve", sans-serif);
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform .2s ease;
+}
+
+.nm-tool--conncheck .nm-btn:hover { transform: translateY(-1px); }
+
+.nm-tool--conncheck .nm-btn:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+.nm-tool--conncheck .nm-btn:disabled:hover { transform: none; }
+.nm-tool--conncheck .nm-btn[data-rerun]:disabled::after {
+    content: "";
+    width: 15px;
+    height: 15px;
+    margin-left: 10px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: nm-conncheck-spin .6s linear infinite;
+}
+@keyframes nm-conncheck-spin { to { transform: rotate(360deg); } }
+
+.nm-tool--conncheck .nm-btn--primary {
+    background: var(--black, #121212);
+    color: var(--white, #fff);
+    border-bottom: 3px solid var(--green-400, #23e6a8);
+}
+
+.nm-tool--conncheck .nm-btn--block {
+    width: 100%;
+    min-height: 60px;
+    font-size: 16px;
+}
+
+.nm-tool--conncheck .nm-btn--ghost {
+    flex: 1;
+    min-height: 46px;
+    font-size: 14px;
+    background: transparent;
+    color: var(--black, #121212);
+    border: 1px solid rgba(0, 0, 0, .16);
+}
+.nm-tool--conncheck .nm-btn--ghost:hover { background: rgba(0, 0, 0, .035); }
+
+.nm-tool--conncheck .nm-conncheck__report { margin-top: 10px; }
+.nm-tool--conncheck .nm-conncheck__report-actions { display: flex; gap: 10px; }
+
+/* While a check is running the report is incomplete, so its controls (and
+   Re-run) are locked — show them as unavailable rather than silently inert. */
+.nm-tool--conncheck .nm-btn:disabled,
+.nm-tool--conncheck .nm-conncheck__terminal-copy:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Terminal-window presentation for the JSON report. */
+.nm-tool--conncheck .nm-conncheck__terminal {
+    position: relative;
+    margin-top: 10px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #0b100e;
+    border: 1px solid rgba(0, 0, 0, .35);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, .22);
+}
+.nm-tool--conncheck .nm-conncheck__terminal-copy {
+    position: absolute;
+    top: 7px;
+    right: 10px;
+    z-index: 2;
+    padding: 3px 12px;
+    font-size: 12px;
+    line-height: 1.6;
+    font-weight: 600;
+    color: #b7f7d8;
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background .15s ease;
+}
+.nm-tool--conncheck .nm-conncheck__terminal-copy:hover,
+.nm-tool--conncheck .nm-conncheck__terminal-copy:focus-visible {
+    background: rgba(255, 255, 255, .16);
+    outline: none;
+}
+.nm-tool--conncheck .nm-conncheck__terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: #161f1a;
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+.nm-tool--conncheck .nm-conncheck__terminal-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    flex: 0 0 auto;
+}
+.nm-tool--conncheck .nm-conncheck__terminal-dot[data-dot="red"]   { background: #ff5f57; }
+.nm-tool--conncheck .nm-conncheck__terminal-dot[data-dot="amber"] { background: #febc2e; }
+.nm-tool--conncheck .nm-conncheck__terminal-dot[data-dot="green"] { background: #28c840; }
+.nm-tool--conncheck .nm-conncheck__terminal-title {
+    margin-left: 8px;
+    color: rgba(255, 255, 255, .5);
+    font-family: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: .01em;
+}
+.nm-tool--conncheck .nm-conncheck__report-json {
+    margin: 0;
+    max-height: 480px;
+    overflow: auto;
+    background: transparent;
+    color: #b7f7d8;
+    font-family: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    padding: 14px 16px;
+    white-space: pre;
+    -webkit-overflow-scrolling: touch;
+    tab-size: 2;
+}
+@media (max-width: 560px) {
+    .nm-tool--conncheck .nm-conncheck__report-actions { flex-direction: column; }
+    .nm-tool--conncheck .nm-conncheck__report-json { font-size: 11px; }
+}
+
+/* Explainer: why the checks matter. Full-width card below the grid. */
+.nm-tool--conncheck .nm-conncheck__explainer {
+    margin-top: var(--nm-gap);
+    background: var(--nm-brand-soft);
+}
+.nm-tool--conncheck .nm-conncheck__explainer-list {
+    list-style: none;
+    margin: var(--nm-gap) 0 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+}
+.nm-tool--conncheck .nm-conncheck__explainer-list li {
+    position: relative;
+    padding-left: 20px;
+    color: var(--nm-text);
+    line-height: 1.55;
+}
+.nm-tool--conncheck .nm-conncheck__explainer-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--nm-brand);
+}
+.nm-tool--conncheck .nm-conncheck__explainer-list strong {
+    color: var(--nm-text);
+    font-weight: 600;
+}
+.nm-tool--conncheck .nm-conncheck__explainer-take {
+    margin: var(--nm-gap) 0 0;
+    color: var(--nm-text);
+    font-weight: 500;
+    line-height: 1.55;
+}

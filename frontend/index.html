@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connection Checker — is your proxy actually hiding you?</title>
+<meta name="description" content="Detect connection and identity leaks across WebRTC, STUN/TURN and HTTP/3 (QUIC). Compares what your browser reports with what the server actually observes.">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="style.css">
+<style>
+  body { margin: 0; font-family: var(--body-font); color: var(--gray-950); background: #fff; }
+  .cc-hero { text-align: center; padding: 48px 20px 8px; }
+  .cc-hero h1 { font-family: var(--body-font-alt); font-size: clamp(30px, 5vw, 48px); margin: 0 0 12px; }
+  .cc-hero p { color: var(--gray-500); font-size: 18px; max-width: 640px; margin: 0 auto; line-height: 1.5; }
+  .cc-wrap { padding: 24px 0 64px; }
+</style>
+</head>
+<body>
+  <header class="cc-hero">
+    <h1>Connection Checker</h1>
+    <p>See how detectable your browser and proxy really are. An independent test of your exit IP, WebRTC (STUN/TURN) and HTTP/3 (QUIC) behavior — comparing what your browser reports with what the server actually observes.</p>
+  </header>
+  <main class="cc-wrap">
+<section class="nm-tool nm-tool--conncheck" data-auto-run="true" data-stun-url="stun:stun.l.google.com:19302" data-turn-check="true" data-h3-check="true"><div class="nm-tool__wrapper"><section class="nm-card nm-conncheck__exposed" data-exposed-box="" data-tone="idle" hidden="" aria-label="Addresses your device exposed"><h3 class="nm-card__title">Addresses your device exposed</h3><div class="nm-verdict__head">
+<span class="nm-verdict__dot" aria-hidden="true"></span>
+<strong data-exposed-title="">—</strong></div><p class="nm-verdict__copy" data-exposed-copy=""></p><div class="nm-exposed__list" data-exposed-list=""></div></section><div class="nm-conncheck__grid"><section class="nm-card nm-conncheck__exit-ip" aria-label="Your exit IP"><h3 class="nm-card__title">Your exit IP (HTTP)</h3><p class="nm-card__intro">The address every website sees when your browser connects over HTTP.</p><dl class="nm-fields"><dt>Detected exit IP</dt><dd data-exit-ip="">—</dd><dt>ISP</dt><dd data-exit-isp="">—</dd><dt>Country / City</dt><dd data-exit-location="">—</dd><dt>Network (ASN)</dt><dd data-exit-asn="">—</dd><dt>Browser</dt><dd data-browser="">Chrome 149</dd><dt>Check status</dt><dd data-check-status="" data-state="running"><span class="nm-fields__value">Running</span></dd></dl>
+<button class="nm-btn nm-btn--primary nm-btn--block" type="button" data-rerun="" disabled="" aria-disabled="true">Re-run check</button><div class="nm-conncheck__report"><div class="nm-conncheck__report-actions">
+<button class="nm-btn nm-btn--ghost" type="button" data-report-toggle="" aria-expanded="false" disabled="" aria-disabled="true"><span data-report-toggle-label="">View report data</span></button>
+<button class="nm-btn nm-btn--ghost" type="button" data-download-report="" disabled="" aria-disabled="true">Download JSON</button></div><div class="nm-conncheck__terminal" data-report-terminal="" hidden=""><div class="nm-conncheck__terminal-bar" aria-hidden="true">
+<span class="nm-conncheck__terminal-dot" data-dot="red"></span>
+<span class="nm-conncheck__terminal-dot" data-dot="amber"></span>
+<span class="nm-conncheck__terminal-dot" data-dot="green"></span>
+<span class="nm-conncheck__terminal-title">connection-check.json</span></div>
+<button class="nm-conncheck__terminal-copy" type="button" data-report-copy="" aria-label="Copy report data" disabled="" aria-disabled="true"><span data-report-copy-label="">Copy</span></button><pre class="nm-conncheck__report-json" data-report-json=""></pre></div></div></section><section class="nm-card nm-conncheck__http3" data-h3-box="" data-tone="idle" aria-label="HTTP/3 support check"><h3 class="nm-card__title">HTTP/3 (QUIC)</h3><p class="nm-card__intro">Checks whether your connection negotiates QUIC over UDP or falls back to TCP.</p><div class="nm-verdict__head">
+<span class="nm-verdict__dot" aria-hidden="true"></span>
+<strong data-h3-title="">Checking…</strong></div><p class="nm-verdict__copy" data-h3-copy=""></p><dl class="nm-fields nm-fields--tight"><dt>Negotiated protocol</dt><dd data-h3-proto="">—</dd></dl></section><section class="nm-card nm-conncheck__webrtc" data-verdict-box="" data-tone="running" aria-label="WebRTC leak check"><h3 class="nm-card__title">WebRTC leak (STUN)</h3><p class="nm-card__intro">Checks whether WebRTC exposes a different IP than your proxy or VPN over UDP.</p><div class="nm-verdict__head">
+<span class="nm-verdict__dot" aria-hidden="true"></span>
+<strong data-verdict-title="">Running test…</strong></div><p class="nm-verdict__copy" data-verdict-copy="">Collecting ICE candidates from your browser.</p><dl class="nm-verdict__compare" data-verdict-compare="" hidden=""><div class="nm-verdict__compare-row"><dt>HTTP IP</dt><dd data-verdict-http-ip="">—</dd></div><div class="nm-verdict__compare-row"><dt>WebRTC IP</dt><dd data-verdict-webrtc-ip="">—</dd></div></dl><dl class="nm-fields nm-fields--tight"><dt>Detected public IP</dt><dd data-webrtc-public="">—</dd><dt>Public IPv6</dt><dd data-webrtc-ipv6="">—</dd><dt>Local LAN IP</dt><dd data-webrtc-local="">—</dd><dt>mDNS candidate</dt><dd data-webrtc-mdns="">—</dd></dl></section><section class="nm-card nm-conncheck__turn" data-turn-box="" data-tone="idle" aria-label="WebRTC verification check"><h3 class="nm-card__title">WebRTC verification (TURN)</h3><p class="nm-card__intro">Confirms the browser-reported address against what our relay server actually observes.</p><div class="nm-verdict__head">
+<span class="nm-verdict__dot" aria-hidden="true"></span>
+<strong data-turn-title="">Checking…</strong></div><p class="nm-verdict__copy" data-turn-copy=""></p><dl class="nm-fields nm-fields--tight"><dt>Browser-reported WebRTC IP</dt><dd data-turn-client-ip="">—</dd><dt>Server-observed (STUN source)</dt><dd data-turn-observed-stun-ip="">—</dd><dt>Server-observed (UDP relay)</dt><dd data-turn-observed-ip="">—</dd><dt>Server-observed (TCP relay)</dt><dd data-turn-observed-tcp-ip="">—</dd></dl></section></div><section class="nm-card nm-conncheck__explainer" aria-label="How anti-bot systems use these signals"><h3 class="nm-card__title">How anti-bot systems use these signals</h3><p class="nm-card__intro">A proxy or VPN only hides you if every channel your browser uses agrees on one address. Detection systems do not just read your exit IP, they cross-check the channels below and flag any that disagree.</p><ul class="nm-conncheck__explainer-list"><li><strong>Exit IP:</strong> the baseline address every website sees over HTTP. Every other channel is compared against it.</li><li><strong>WebRTC:</strong> browsers can reveal your real IP over UDP even when a proxy covers your normal web traffic. A different IP here is a direct leak.</li><li><strong>Server-side check:</strong> a site can compare the address your browser reports against the one its own server actually receives. An anti-detect browser that rewrites the address is caught here.</li><li><strong>HTTP/3 (QUIC):</strong> QUIC runs over UDP. A connection that cannot carry it and falls back to TCP stands out from the large share of traffic already on HTTP/3.</li><li><strong>Consistency:</strong> a real visitor almost always has a working, matching WebRTC address. A fully blocked or missing one is unusual, so it is treated as a signal on its own.</li></ul><p class="nm-conncheck__explainer-take">The takeaway is simple: a well-configured proxy binds all of these channels to the same IP. Any channel that shows a different address, or no address at all, makes you easier to detect.</p></section></div></section>
+  </main>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

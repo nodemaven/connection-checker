@@ -1,0 +1,31 @@
+/* Design tokens the Connection Checker widget references. Standalone build:
+   these normally come from the host theme; defined here so the tool renders
+   correctly and on-brand on its own. Edit the palette to match your site. */
+:root {
+  --white: #ffffff;
+  --black: #000000;
+
+  --gray-50:  #fafafa;
+  --gray-200: #e6e6e6;
+  --gray-500: #6d6d6d;
+  --gray-900: #333333;
+  --gray-950: #121212;
+
+  --brand-50:  #f0f6fe;
+  --brand-500: #4a88ee;
+
+  --green-100: #defbf2;
+  --green-400: #23e6a8;
+  --green-600: #00a778;
+
+  --amber-100: #fef3d8;
+  --amber-500: #f5a524;
+
+  --rose-100: #ffe4ea;
+  --rose-600: #e13961;
+
+  --body-font:     "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --body-font-alt: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-body:    var(--body-font);
+  --font-display: var(--body-font-alt);
+}
