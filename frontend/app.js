@@ -943,7 +943,9 @@
         function probe(n) {
             var url = self.h3Base + '/h3probe?n=' + n + '&_t=' + Date.now();
             var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-            var timer = controller ? setTimeout(function () { controller.abort(); }, 7000) : null;
+            // First attempt gets a cold-tunnel allowance; the connection is warm
+            // after that, so later attempts fail faster instead of hanging 7s each.
+            var timer = controller ? setTimeout(function () { controller.abort(); }, n === 1 ? 7000 : 4000) : null;
             var opts = { cache: 'no-store', mode: 'cors' };
             if (controller) opts.signal = controller.signal;
             return fetch(url, opts).then(function (r) {
@@ -968,9 +970,19 @@
         // h3 on ANY attempt is a pass, all-TCP after MAX_ATTEMPTS is a
         // genuine fallback.
         var MAX_ATTEMPTS = 5;
+        // Total time budget. A connection that CAN do h3 is fast, so all five
+        // attempts finish well inside this and h3 (which only shows from ~attempt
+        // 3) is caught. A connection that can't carry UDP — e.g. a proxy, exactly
+        // this tool's audience — is both slow AND never h3, so once the budget is
+        // spent we conclude with the TCP fallback we already saw instead of
+        // grinding through all five and leaving "Checking…" on screen for ~35s.
+        var H3_BUDGET_MS = 12000;
+        var startedAt = Date.now();
         var lastTcpProto = '';
 
         function attempt(n) {
+            // Live progress so a slow check never looks frozen.
+            self.setH3Result('running', s('h3.checking', 'Checking…') + ' (' + n + '/' + MAX_ATTEMPTS + ')', '');
             return probe(n).then(function (res) {
                 // The timing entry can land a beat after the fetch resolves.
                 return new Promise(function (r) { setTimeout(function () { r(res); }, 450); });
@@ -979,7 +991,9 @@
                 var proto = entries.length ? (entries[entries.length - 1].nextHopProtocol || '') : '';
                 if (proto === 'h3') { return 'h3'; }
                 if (proto === 'h2' || proto.indexOf('http/1') === 0) { lastTcpProto = proto; }
-                if (n >= MAX_ATTEMPTS) return lastTcpProto ? 'tcp' : 'unknown';
+                if (n >= MAX_ATTEMPTS || (Date.now() - startedAt) > H3_BUDGET_MS) {
+                    return lastTcpProto ? 'tcp' : 'unknown';
+                }
                 return attempt(n + 1);
             });
         }
