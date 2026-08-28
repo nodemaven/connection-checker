@@ -121,3 +121,11 @@ leak turn red.
   stripped.
 - **TURN always "Unavailable"** — the relay UDP range or 3478 is closed, or
   `external-ip` / `static-auth-secret` in `turnserver.conf` don't match `.env`.
+
+## Optional: enable the TCP-relay channel
+
+`turnserver.conf.example` ships with `no-tcp-relay` (TURN over TCP disabled) as a
+safe default, because a TCP relay is a broader abuse surface. The tool's
+**TCP-relay check** only works if you enable it: comment out `no-tcp-relay` in
+your `turnserver.conf` and open **TCP 3478** on your firewall. Leave it off if
+you don't need that channel — the other checks are unaffected.
