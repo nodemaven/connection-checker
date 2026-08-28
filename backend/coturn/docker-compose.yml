@@ -1,0 +1,117 @@
+# @author Salama Malek
+# coturn STUN/TURN server for TURN-based WebRTC leak detection.
+#
+#   1. cp .env.example .env                     # fill TURN_STATIC_AUTH_SECRET + REDIS_PASSWORD
+#   2. cp turnserver.conf.example turnserver.conf
+#      then set external-ip / realm / min-port / max-port to match this box
+#   3. docker compose up -d
+#
+# Why network_mode: host — coturn allocates a relay socket per session inside
+# min-port..max-port. Publishing that range through the Docker bridge creates one
+# userland proxy per port and mangles the source address coturn needs to observe,
+# which is the entire point of this server. Host networking is the standard way to
+# run coturn and keeps the observed client IP honest.
+#
+# Ports used on the host: 3478/udp (STUN+TURN) and the relay range from
+# turnserver.conf. Both must be open in the AWS security group AND the OS firewall.
+
+services:
+  coturn:
+    image: coturn/coturn:4.6
+    container_name: coturn
+    mem_limit: 128m              # ~3x observed (13MiB); keeps one leak off the whole box
+    restart: unless-stopped
+    network_mode: host
+    # turnserver.conf is host-managed (it holds the shared secret) and is excluded
+    # from deploy rsync, exactly like .env.
+    volumes:
+      - ./turnserver.conf:/etc/coturn/turnserver.conf:ro
+    command: ["-c", "/etc/coturn/turnserver.conf"]
+    depends_on:
+      - coturn-redis
+    healthcheck:
+      # A real STUN binding request against ourselves on the loopback listener.
+      # turnserver.conf MUST keep `listening-ip=127.0.0.1` alongside the private
+      # IP or this probe has nothing to talk to and the container sits unhealthy
+      # forever while serving traffic perfectly well.
+      test: ["CMD-SHELL", "turnutils_stunclient -p 3478 127.0.0.1 >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Allocation store. coturn writes each allocation (including the real UDP source
+  # address it observed) here via redis-statsdb; the read-back endpoint queries it.
+  # Bound to localhost only — nothing outside the box may reach it.
+  coturn-redis:
+    image: redis:7-alpine
+    container_name: coturn-redis
+    mem_limit: 128m              # ~3x observed (4MiB); keeps one leak off the whole box
+    restart: unless-stopped
+    network_mode: host
+    # Needed by the healthcheck below — the command line is interpolated by
+    # compose on the host, but the healthcheck runs inside the container.
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: >
+      redis-server
+      --port 6380
+      --bind 127.0.0.1
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 128mb
+      --maxmemory-policy allkeys-lru
+      --save ""
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -p 6380 -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Session-keyed STUN observation. Binds a pool of host UDP ports and records
+  # the source of any STUN Binding request per session (the port is the session
+  # key; the allocator in turn-readback writes port->token to Redis). Catches
+  # the real UDP source an anti-detect browser leaks via srflx gathering even
+  # when it blocks the TURN allocation. network_mode host so it binds the pool
+  # ports directly; those ports must be open inbound in the security group.
+  stun-observe:
+    build: ./stun-observe
+    container_name: stun-observe
+    mem_limit: 128m              # ~3x observed (17MiB); keeps one leak off the whole box
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      STUN_PORT_START: "20000"
+      STUN_PORT_END: "20063"
+    depends_on:
+      - coturn-redis
+
+  # Read-only HTTP window onto the Redis store, for the credentials service (a different
+  # server entirely) to read back "what IP did coturn actually observe for
+  # this session". Binds 127.0.0.1:8004 only; Caddy reverse-proxies it at
+  # https://turn.example.com/allocation-status. See turn-readback/app.py.
+  turn-readback:
+    build: ./turn-readback
+    container_name: turn-readback
+    mem_limit: 128m              # ~3x observed (46MiB); keeps one leak off the whole box
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      INTERNAL_SECRET: ${TURN_READBACK_SECRET}
+      # Must match the stun-observe service's pool exactly.
+      STUN_HOST: turn.example.com
+      STUN_PORT_START: "20000"
+      STUN_PORT_END: "20063"
+    depends_on:
+      - coturn-redis
+    healthcheck:
+      # python, not curl: the python:3.12-slim base image has no curl, so a
+      # curl-based probe fails every time and the container reports unhealthy
+      # while serving traffic perfectly well. Verified on the box: the probe
+      # was returning "curl: not found" while the public /healthz answered 200.
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8004/healthz', timeout=3).status==200 else 1)\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

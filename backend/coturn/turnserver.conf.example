@@ -1,0 +1,101 @@
+# coturn config for TURN-based WebRTC leak detection.
+# @author Salama Malek
+#
+# Copy to turnserver.conf on the box and fill the marked values. This file holds
+# the shared secret, so the real turnserver.conf is never committed and never
+# overwritten by a deploy.
+
+# ---------------------------------------------------------------------------
+# Listeners
+# ---------------------------------------------------------------------------
+listening-port=3478
+fingerprint
+
+# Pin the listener and the relay to this box's real interface. Without these,
+# coturn auto-discovers EVERY interface, picks up the Docker bridges
+# (172.17-172.21.0.1) and hands them out as relay candidates — a browser gets a
+# relay address it can never reach and the allocation fails for no visible reason.
+# Set the first line to the box's PRIVATE ip (same one used in external-ip below).
+# The 127.0.0.1 listener is what the compose healthcheck probes; drop it and the
+# container reports unhealthy forever while working fine.
+listening-ip=PRIVATE_IP
+listening-ip=127.0.0.1
+relay-ip=PRIVATE_IP
+
+# UDP only by default. TURN over TCP would let the relay be used as a general
+# TCP tunnel, which is a much bigger abuse surface for no benefit here.
+no-tcp-relay
+
+# ---------------------------------------------------------------------------
+# EC2 NAT — THE ONE THAT BREAKS EVERYTHING IF WRONG
+# ---------------------------------------------------------------------------
+# The box sees only its private address; the world reaches it on the Elastic IP.
+# Without this, coturn hands out relay candidates pointing at the private IP and
+# no browser can ever connect. Format: <public-ip>/<private-ip>
+# Get the private IP with:  ip -4 addr show ens5 | awk '/inet /{print $2}'
+external-ip=PUBLIC_ELASTIC_IP/PRIVATE_IP
+
+# ---------------------------------------------------------------------------
+# Relay port range — keep it TIGHT
+# ---------------------------------------------------------------------------
+# coturn's default is 49152-65535. We do not need thousands of ports for a leak
+# test: one allocation per visitor, seconds long. A small range is a far easier
+# security-group request and a much smaller attack surface. Widen only if
+# allocations start failing under real traffic.
+# 2000 relay ports = 2000 concurrent allocations before port exhaustion.
+# The original 49160-49200 gave 41, which one burst of checker traffic can
+# fill. total-quota (below) stays the deliberate global session cap; the
+# range just needs to sit comfortably above it. Relay ports receive no
+# inbound traffic in the checker's allocate-only flow, so widening needs no
+# security-group change.
+min-port=49160
+max-port=51159
+
+# ---------------------------------------------------------------------------
+# Auth — TURN REST API (short-lived credentials minted by the credentials service)
+# ---------------------------------------------------------------------------
+# The browser never gets a long-lived password. WP issues
+# username=<unix_expiry>:<session_id> and credential=base64(HMAC-SHA1(username, secret)).
+use-auth-secret
+static-auth-secret=REPLACE_WITH_TURN_STATIC_AUTH_SECRET
+realm=example.com
+
+# ---------------------------------------------------------------------------
+# Allocation store — this is how we read back the observed client IP
+# ---------------------------------------------------------------------------
+redis-statsdb="ip=127.0.0.1 port=6380 password=REPLACE_WITH_REDIS_PASSWORD dbname=0 connect_timeout=5"
+
+# ---------------------------------------------------------------------------
+# Abuse containment — an open relay gets found fast
+# ---------------------------------------------------------------------------
+# Never let a relay reach private space. Without these, anyone with credentials
+# could pivot into the VPC and hit internal services from inside the box.
+denied-peer-ip=0.0.0.0-0.255.255.255
+denied-peer-ip=10.0.0.0-10.255.255.255
+denied-peer-ip=100.64.0.0-100.127.255.255
+denied-peer-ip=127.0.0.0-127.255.255.255
+denied-peer-ip=169.254.0.0-169.254.255.255
+denied-peer-ip=172.16.0.0-172.31.255.255
+denied-peer-ip=192.0.0.0-192.0.0.255
+denied-peer-ip=192.168.0.0-192.168.255.255
+denied-peer-ip=198.18.0.0-198.19.255.255
+denied-peer-ip=::1
+denied-peer-ip=fc00::-fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff
+denied-peer-ip=fe80::-febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff
+
+no-multicast-peers
+no-loopback-peers
+
+# Quotas. A leak test allocates briefly and moves almost no data, so these are
+# generous for us and hostile to anyone trying to relay real traffic.
+user-quota=6
+total-quota=300
+max-bps=64000
+
+# No admin CLI / web port. We read state from Redis, so neither is needed.
+no-cli
+web-admin-listen-on-workers=0
+
+# Log to stdout so `docker compose logs` is the single place to look.
+log-file=stdout
+simple-log

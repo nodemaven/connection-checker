@@ -1,0 +1,24 @@
+# @author Salama Malek
+# HTTP/3 (QUIC) probe + exit-IP endpoint for the Connection Checker.
+#
+#   docker compose up -d --build
+#
+# Published on localhost:8005 only; put it behind your TLS reverse proxy
+# (e.g. Caddy/nginx) at probe.example.com. Must serve HTTP/3 (QUIC) on UDP 443
+# and advertise Alt-Svc for the check to work.
+services:
+  http3-probe:
+    build: .
+    container_name: http3-probe
+    mem_limit: 256m              # ~3x observed (48MiB); keeps one leak off the whole box
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8005:8000"
+    healthcheck:
+      # python, not curl: the slim image has no curl, and a curl-based probe
+      # would sit unhealthy forever while the service answers perfectly well.
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3).status==200 else 1)\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
