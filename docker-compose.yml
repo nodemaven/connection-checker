@@ -1,0 +1,12 @@
+# Connection Checker — full backend, single entry point.
+#
+#   cp .env.example .env      # fill in your domain + generated secrets
+#   docker compose up -d --build
+#
+# Note: coturn's turnserver.conf is host-managed (it holds the shared secret and
+# is git-ignored) — copy backend/coturn/turnserver.conf.example to
+# backend/coturn/turnserver.conf and fill it in first. See docs/SELF_HOSTING.md.
+include:
+  - backend/coturn/docker-compose.yml
+  - backend/http3-probe/docker-compose.yml
+  - backend/credentials/docker-compose.yml
