@@ -19,7 +19,7 @@ A tool that shows whether your connection is quietly leaking your real identity 
 
 [![tests](https://github.com/nodemaven/connection-checker/actions/workflows/tests.yml/badge.svg)](https://github.com/nodemaven/connection-checker/actions/workflows/tests.yml) ![MIT License](https://img.shields.io/badge/license-MIT-black) ![Backend: Python](https://img.shields.io/badge/backend-Python-3776AB) ![Frontend: Vanilla JS](https://img.shields.io/badge/frontend-Vanilla%20JS-f7df1e) ![PRs welcome](https://img.shields.io/badge/PRs-welcome-23E6A8)
 
-<img src="docs/hero.png?v=2" alt="Connection Checker running in the browser" width="820">
+<img src="docs/connection-checker-hero.png" alt="Connection Checker running in the browser" width="820">
 
 </div>
 
