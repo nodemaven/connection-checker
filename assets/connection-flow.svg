@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 170" width="760" height="170" role="img" aria-label="A request travelling from your browser through a proxy to the target, with the packet animated along the path">
+  <defs>
+    <radialGradient id="glow" cx="82%" cy="-10%" r="70%">
+      <stop offset="0%" stop-color="#35E08A" stop-opacity="0.16"/>
+      <stop offset="60%" stop-color="#35E08A" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="dotGlow" x="-300%" y="-300%" width="700%" height="700%">
+      <feGaussianBlur stdDeviation="3.4" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- banner -->
+  <rect x="6" y="6" width="748" height="158" rx="18" fill="#080C0A"/>
+  <rect x="6" y="6" width="748" height="158" rx="18" fill="url(#glow)"/>
+
+  <!-- flow card -->
+  <rect x="40" y="42" width="680" height="86" rx="16" fill="#141D18" stroke="#ffffff" stroke-opacity="0.10"/>
+
+  <!-- dashed connectors -->
+  <line x1="166" y1="78" x2="364" y2="78" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <line x1="396" y1="78" x2="594" y2="78" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.5" stroke-dasharray="6 6"/>
+
+  <!-- node markers -->
+  <circle cx="150" cy="78" r="4.5" fill="#ffffff" fill-opacity="0.30"/>
+  <circle cx="380" cy="78" r="5.5" fill="#35E08A"/>
+  <circle cx="610" cy="78" r="4.5" fill="#ffffff" fill-opacity="0.30"/>
+
+  <!-- travelling packet -->
+  <circle cy="78" r="5" fill="#35E08A" filter="url(#dotGlow)">
+    <animate attributeName="cx" values="72;688" dur="2.6s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.12;0.88;1" dur="2.6s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- labels -->
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" text-anchor="middle">
+    <text x="150" y="106" font-size="13" font-weight="600" fill="#ffffff" fill-opacity="0.60">Browser</text>
+    <text x="380" y="103" font-size="13" font-weight="700" fill="#35E08A">Proxy</text>
+    <text x="380" y="118" font-size="10.5" font-weight="500" fill="#ffffff" fill-opacity="0.42" font-family="'JetBrains Mono', ui-monospace, monospace">US exit</text>
+    <text x="610" y="106" font-size="13" font-weight="600" fill="#ffffff" fill-opacity="0.60">Target</text>
+  </g>
+</svg>

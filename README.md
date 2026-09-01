@@ -1,5 +1,14 @@
 <div align="center">
 
+<!-- Org mark, byte-identical to the one on the org profile and proxy-benchmark
+     (md5 2fbcc1624ea51bacf95ca6e9c5c7c686) so the pages read as one set.
+     Relative path so it survives a fork. -->
+<a href="https://github.com/nodemaven"><img src="assets/nodemaven-mark.svg" alt="NodeMaven" height="52"></a>
+
+<!-- Animated flow (SMIL, plays in the GitHub README): a request travels
+     Browser -> Proxy -> Target. -->
+<img src="assets/connection-flow.svg" alt="A request travelling from your browser through a proxy to the target" width="720">
+
 # Connection Checker
 
 ### Is your proxy actually hiding you?
