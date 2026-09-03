@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest a new check or an improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem or use case
+      description: What are you trying to find out that the tool cannot tell you today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: textarea
+    id: observable
+    attributes:
+      label: How would it be verified server-side?
+      description: >
+        This tool's rule is that it does not just trust the browser. If you are
+        proposing a new check, what would the server independently observe to
+        confirm or contradict what the browser claims? A check that can only ask
+        the browser is one this tool cannot make trustworthy.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

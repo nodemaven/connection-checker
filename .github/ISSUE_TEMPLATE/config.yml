@@ -1,0 +1,22 @@
+# Blank issues stay on. The two forms cover a broken check and a proposed one,
+# and anything else is a question, which should not need a form.
+blank_issues_enabled: true
+
+contact_links:
+  - name: A NodeMaven account, billing or proxy-pool question
+    url: https://nodemaven.com
+    about: >
+      This repository is an open-source leak-detection tool and its maintainers
+      cannot see your account. Please use NodeMaven support instead.
+
+  - name: A security vulnerability
+    url: https://github.com/nodemaven/connection-checker/blob/main/SECURITY.md
+    about: >
+      Please do not open a public issue. SECURITY.md has the disclosure address.
+
+  - name: Self-hosting setup trouble
+    url: https://github.com/nodemaven/connection-checker/blob/main/docs/SELF_HOSTING.md
+    about: >
+      DNS, TLS, the UDP port range and the turnserver.conf secret are the usual
+      causes. SELF_HOSTING.md covers each, including the mismatch that makes
+      every TURN check fail.

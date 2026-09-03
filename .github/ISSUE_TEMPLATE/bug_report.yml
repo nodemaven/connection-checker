@@ -1,0 +1,66 @@
+name: Bug report
+description: A check reports the wrong thing, or the tool does not run
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Before filing: a red or amber result is not necessarily a bug. Please read
+        [What it does not check](../blob/main/README.md#what-it-does-not-check)
+        first, since DNS, browser fingerprinting and blocked channels are all out
+        of scope by design.
+
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Where did you run it?
+      options:
+        - The live demo at nodemaven.com
+        - Self-hosted
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What the tool reported, and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: Firefox 142 / Chrome 140 / Safari 18
+    validations:
+      required: true
+
+  - type: input
+    id: connection
+    attributes:
+      label: Connection under test
+      description: >
+        Proxy type or VPN, if any. Please do not paste credentials, endpoints or
+        your real IP address.
+      placeholder: residential proxy / VPN / direct
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors or logs
+      description: >
+        Redact addresses before pasting. Anything here is public.
+      render: text
