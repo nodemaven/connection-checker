@@ -6,7 +6,7 @@ body:
     attributes:
       value: >
         Before filing: a red or amber result is not necessarily a bug. Please read
-        [What it does not check](../blob/main/README.md#what-it-does-not-check)
+        [What it does not check](https://github.com/nodemaven/connection-checker#what-it-does-not-check)
         first, since DNS, browser fingerprinting and blocked channels are all out
         of scope by design.
 

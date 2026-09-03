@@ -118,8 +118,8 @@ All backend services are self-contained and run with Docker. No part of the tool
 
 ## Self-host in 5 minutes
 
-> **Requires** Docker with Compose **v2.20 or newer** (the root `docker-compose.yml`
-> uses the `include:` key), and a server with a public IP. The TURN and HTTP/3
+> **Requires** Docker with Compose **v2.20.3 or newer** (the root `docker-compose.yml`
+> uses the `include:` key, which Docker documents as fully supported from 2.20.3), and a server with a public IP. The TURN and HTTP/3
 > checks need reachable UDP ports, so this will not work behind NAT.
 
 ```bash
