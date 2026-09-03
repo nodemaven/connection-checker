@@ -26,12 +26,16 @@ jobs:
       - name: Run tests
         run: cd ${{ matrix.service }} && python -m pytest -q
 
-  frontend:
+  # Named for what it actually does. This parses the frontend but does not
+  # exercise any of the leak-detection logic in app.js, so the green badge above
+  # is a claim about the backend suites only. Real frontend tests are wanted:
+  # see CONTRIBUTING.md.
+  frontend-syntax:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Syntax-check the frontend JS
+      - name: Syntax-check the frontend JS (parse only, not a test)
         run: node --check frontend/app.js && node --check frontend/config.js
